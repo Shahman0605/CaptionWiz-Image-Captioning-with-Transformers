@@ -2,7 +2,6 @@
 """
 ## Other Functions
 """
-# %%
 # a function to determine whether a string is a URL or not
 def is_url(string):
     try:
@@ -46,7 +45,7 @@ def preprocess(items):
 ## Metric Evaluation
 """
 
-# %%
+
 def compute_metrics(eval_pred):
   preds = eval_pred.label_ids
   labels = eval_pred.predictions
@@ -67,16 +66,12 @@ def compute_metrics(eval_pred):
         gen_len": bleu_result["translation_length"] / len(preds)
   }
 
-# %%
 """
 ## Compare with other model
 """
-
-# %%
 # using the pipeline API
 image_captioner = pipeline("image-to-text", model="Abdou/vit-swin-base-224-gpt2-image-captioning")
-image_captioner.model = image_captioner.model.to(device)
+image_captioner.model = image_captioner.model.to(device
 
-# %%
 get_evaluation_metrics(image_captioner.model, test_dataset)
 
