@@ -58,13 +58,9 @@ def compute_metrics(eval_pred):
   # decode the predictions and labels
   pred_str = tokenizer.batch_decode(preds, skip_special_tokens=True)
   labels_str = tokenizer.batch_decode(labels, skip_special_tokens=True)
-  # compute the rouge score
   rouge_result = rouge.compute(predictions=pred_str, references=labels_str)
-  # multiply by 100 to get the same scale as the rouge score
   rouge_result = {k: round(v * 100, 4) for k, v in rouge_result.items()}
-  # compute the bleu score
   bleu_result = bleu.compute(predictions=pred_str, references=labels_str)
-  # get the length of the generated captions
   generation_length = bleu_result["translation_length"]
   return {
         **rouge_result, 
