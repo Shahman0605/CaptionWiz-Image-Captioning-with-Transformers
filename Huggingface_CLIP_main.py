@@ -21,28 +21,6 @@ import os
 # set device to GPU if available
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-def is_url(string):
-    try:
-        result = parse.urlparse(string)
-        return all([result.scheme, result.netloc, result.path])
-    except:
-        return False
-    
-# a function to load an image
-def load_image(image_path):
-    if is_url(image_path):
-        return Image.open(requests.get(image_path, stream=True).raw)
-    elif os.path.exists(image_path):
-        return Image.open(image_path)
-        
-# a function to perform inference
-def get_caption(model, image_processor, tokenizer, image_path):
-    image = load_image(image_path)
-    img = image_processor(image, return_tensors="pt").to(device)
-    output = model.generate(**img)
-    caption = tokenizer.batch_decode(output, skip_special_tokens=True)[0]
-    return caption
-
 # load the model
 model = VisionEncoderDecoderModel.from_encoder_decoder_pretrained(
     encoder_model, decoder_model
@@ -80,12 +58,6 @@ test_ds = test_ds.filter(lambda item: np.array(item["image"]).ndim in [3, 4], nu
 train_dataset = train_ds.with_transform(preprocess)
 valid_dataset = valid_ds.with_transform(preprocess)
 test_dataset  = test_ds.with_transform(preprocess)
-
-def collate_fn(batch):
-    return {
-        'pixel_values': torch.stack([x['pixel_values'] for x in batch]),
-        'labels': torch.stack([x['labels'] for x in batch])
-    }
 
 rouge = evaluate.load("rouge")
 bleu = evaluate.load("bleu")
