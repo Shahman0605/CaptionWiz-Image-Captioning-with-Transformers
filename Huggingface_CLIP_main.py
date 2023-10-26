@@ -38,11 +38,8 @@ def load_image(image_path):
 # a function to perform inference
 def get_caption(model, image_processor, tokenizer, image_path):
     image = load_image(image_path)
-    # preprocess the image
     img = image_processor(image, return_tensors="pt").to(device)
-    # generate the caption (using greedy decoding by default)
     output = model.generate(**img)
-    # decode the output
     caption = tokenizer.batch_decode(output, skip_special_tokens=True)[0]
     return caption
 
@@ -51,29 +48,24 @@ model = VisionEncoderDecoderModel.from_encoder_decoder_pretrained(
     encoder_model, decoder_model
 ).to(device)
 
-# initialize the tokenizer
+
 # tokenizer = AutoTokenizer.from_pretrained(decoder_model)
 tokenizer = GPT2TokenizerFast.from_pretrained(decoder_model)
 # tokenizer = BertTokenizerFast.from_pretrained(decoder_model)
-# load the image processor
+
 image_processor = ViTImageProcessor.from_pretrained(encoder_model)
 
 if "gpt2" in decoder_model:
-  # gpt2 does not have decoder_start_token_id and pad_token_id
-  # but has bos_token_id and eos_token_id
   tokenizer.pad_token = tokenizer.eos_token # pad_token_id as eos_token_id
   model.config.eos_token_id = tokenizer.eos_token_id
   model.config.pad_token_id = tokenizer.pad_token_id
-  # set decoder_start_token_id as bos_token_id
   model.config.decoder_start_token_id = tokenizer.bos_token_id
 else:
-  # set the decoder start token id to the CLS token id of the tokenizer
   model.config.decoder_start_token_id = tokenizer.cls_token_id
-  # set the pad token id to the pad token id of the tokenizer
   model.config.pad_token_id = tokenizer.pad_token_id
 
-max_length = 32 # max length of the captions in tokens
-coco_dataset_ratio = 20 # 20% of the COCO2014 dataset
+max_length = 32 
+coco_dataset_ratio = 50 
 train_ds = load_dataset("HuggingFaceM4/COCO", split=f"train[:{coco_dataset_ratio}%]")
 valid_ds = load_dataset("HuggingFaceM4/COCO", split=f"validation[:{coco_dataset_ratio}%]")
 test_ds = load_dataset("HuggingFaceM4/COCO", split="test")
@@ -85,15 +77,6 @@ valid_ds = valid_ds.filter(lambda item: np.array(item["image"]).ndim in [3, 4], 
 test_ds = test_ds.filter(lambda item: np.array(item["image"]).ndim in [3, 4], num_proc=2)
 
 
-def preprocess(items):
-  # preprocess the image
-  pixel_values = image_processor(items["image"], return_tensors="pt").pixel_values.to(device)
-  # tokenize the caption with truncation and padding
-  targets = tokenizer([ sentence["raw"] for sentence in items["sentences"] ], 
-                      max_length=max_length, padding="max_length", truncation=True, return_tensors="pt").to(device)
-  return {'pixel_values': pixel_values, 'labels': targets["input_ids"]}
-
-# using with_transform to preprocess the dataset during training
 train_dataset = train_ds.with_transform(preprocess)
 valid_dataset = valid_ds.with_transform(preprocess)
 test_dataset  = test_ds.with_transform(preprocess)
