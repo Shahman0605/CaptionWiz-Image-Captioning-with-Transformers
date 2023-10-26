@@ -13,14 +13,15 @@ from transformers import ViTFeatureExtractor, ViTForImageClassification
 import urllib.parse as parse
 import os
 
-# set device to GPU if available
+
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 app = FastAPI()
 
+""
 # Load your trained CLIP model here
-# %%
+""
 # the encoder model that process the image and return the image features
 # encoder_model = "WinKawaks/vit-small-patch16-224"
 # encoder_model = "google/vit-base-patch16-224"
@@ -30,7 +31,8 @@ encoder_model = "microsoft/swin-base-patch4-window7-224-in22k"
 # decoder_model = "bert-base-uncased"
 # decoder_model = "prajjwal1/bert-tiny"
 decoder_model = "gpt2"
-# load the model
+
+
 model = VisionEncoderDecoderModel.from_encoder_decoder_pretrained(
     encoder_model, decoder_model
 ).to(device)
@@ -43,10 +45,10 @@ cache = {}
 @app.post("/find_similar")
 async def find_similar_image(file: UploadFile):
     image = Image.open(file.file)
-    # Process the image and find the most similar image and text using the CLIP model
+
     similar_image, similar_text = find_most_similar_image_and_text(best_model, image)
     
-    # Store the result in the cache
+
     cache[file.filename] = (similar_image, similar_text)
     
     return {"similar_image": similar_image, "similar_text": similar_text}
