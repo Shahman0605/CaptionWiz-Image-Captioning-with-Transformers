@@ -28,7 +28,6 @@ def get_caption(model, image_processor, tokenizer, image_path):
     caption = tokenizer.batch_decode(output, skip_special_tokens=True)[0]
     return caption
 
-
 """
 ## Preprocessing Function
 """
@@ -42,10 +41,17 @@ def preprocess(items):
   return {'pixel_values': pixel_values, 'labels': targets["input_ids"]}
 
 """
+## Collate Function
+"""
+def collate_fn(batch):
+    return {
+        'pixel_values': torch.stack([x['pixel_values'] for x in batch]),
+        'labels': torch.stack([x['labels'] for x in batch])
+    }
+
+"""
 ## Metric Evaluation
 """
-
-
 def compute_metrics(eval_pred):
   preds = eval_pred.label_ids
   labels = eval_pred.predictions
