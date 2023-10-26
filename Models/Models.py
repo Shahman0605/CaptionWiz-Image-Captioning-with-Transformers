@@ -5,7 +5,6 @@ from transformers import ViTFeatureExtractor, ViTForImageClassification
 import urllib.parse as parse
 import os
 
-# %%
 # the encoder model that process the image and return the image features
 # encoder_model = "WinKawaks/vit-small-patch16-224"
 # encoder_model = "google/vit-base-patch16-224"
