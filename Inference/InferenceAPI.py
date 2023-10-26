@@ -19,9 +19,9 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 app = FastAPI()
 
-""
-# Load your trained CLIP model here
-""
+"""
+## LOAD MODELS
+"""
 # the encoder model that process the image and return the image features
 # encoder_model = "WinKawaks/vit-small-patch16-224"
 # encoder_model = "google/vit-base-patch16-224"
