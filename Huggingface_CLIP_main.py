@@ -61,26 +61,6 @@ test_dataset  = test_ds.with_transform(preprocess)
 
 rouge = evaluate.load("rouge")
 bleu = evaluate.load("bleu")
-  
-def compute_metrics(eval_pred):
-  preds = eval_pred.label_ids
-  labels = eval_pred.predictions
-  # decode the predictions and labels
-  pred_str = tokenizer.batch_decode(preds, skip_special_tokens=True)
-  labels_str = tokenizer.batch_decode(labels, skip_special_tokens=True)
-  # compute the rouge score
-  rouge_result = rouge.compute(predictions=pred_str, references=labels_str)
-  # multiply by 100 to get the same scale as the rouge score
-  rouge_result = {k: round(v * 100, 4) for k, v in rouge_result.items()}
-  # compute the bleu score
-  bleu_result = bleu.compute(predictions=pred_str, references=labels_str)
-  # get the length of the generated captions
-  generation_length = bleu_result["translation_length"]
-  return {
-        **rouge_result, 
-        "bleu": round(bleu_result["bleu"] * 100, 4), 
-        gen_len": bleu_result["translation_length"] / len(preds)
-  }
 
 num_epochs = 2 
 batch_size = 64 
